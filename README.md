@@ -8,7 +8,7 @@ See `HUIPatternLockViewDemo.xcodeproj`
 1. Add pod into your Podfile
 
 	```swift
-	pod 'HUIPatternLockView-Swift', :git => 'https://github.com/Tinghui/HUIPatternLockView-Swift.git', :tag => '1.0.0'
+	pod 'HUIPatternLockView-Swift', '~> 1.0.0'
 	```
 
 2. Run pod install
