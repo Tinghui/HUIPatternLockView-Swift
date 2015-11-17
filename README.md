@@ -2,7 +2,7 @@
 ## Demo Project
 See `HUIPatternLockViewDemo.xcodeproj`
 
-![](https://raw.githubusercontent.com/Tinghui/HUIPatternLockView-Swift/preview.png) 
+![](https://github.com/Tinghui/HUIPatternLockView-Swift/blob/master/preview.png?raw=true) 
 
 ## Installation by CocoaPods
 1. Add pod into your Podfile
