@@ -22,6 +22,7 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
 }
 
 @IBDesignable public class HUIPatternLockView : UIView {
+    static let defaultColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
     
     //MARK: Layouts Related Properties
     @IBInspectable var numberOfRows: Int = 3 {
@@ -46,12 +47,37 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
     }
     
     //MARK: Appearance Related Properties
-    @IBInspectable var lineColor: UIColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0) {
+    @IBInspectable var lineColor: UIColor = HUIPatternLockView.defaultColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
     @IBInspectable var lineWidth: CGFloat = 5.00 {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable var normalOuterCircleColor: UIColor = UIColor.blackColor() {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable var highlightedOuterCircleColor: UIColor = HUIPatternLockView.defaultColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable var normalInnerDotColor: UIColor = UIColor.blackColor() {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable var highlightedInnerDotColor: UIColor = HUIPatternLockView.defaultColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable var innerDotRadius: CGFloat = 15.0 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
@@ -66,6 +92,7 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
+    
     
     //MARK: Callback
     var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
@@ -168,10 +195,19 @@ extension HUIPatternLockView {
             CGContextDrawPath(context, .Stroke)
         }
         
+
         //draw normal dot images
+        CGContextSetLineWidth(context, 1)
+
         if let image = normalDotImage {
             for dot in normalDots {
                 image.drawInRect(dot.frame)
+            }
+        } else {
+            CGContextSetFillColorWithColor(context, normalInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, normalOuterCircleColor.CGColor)
+            for dot in normalDots {
+                drawDot(dot)
             }
         }
         
@@ -180,7 +216,23 @@ extension HUIPatternLockView {
             for dot in highlightedDots {
                 image.drawInRect(dot.frame)
             }
+        } else {
+            CGContextSetFillColorWithColor(context, highlightedInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, highlightedOuterCircleColor.CGColor)
+            for dot in highlightedDots {
+                drawDot(dot)
+            }
         }
+    }
+
+    private func drawDot(dot: HUIPatternLockViewDot) {
+        let context = UIGraphicsGetCurrentContext()
+        let x = CGRectGetMidX(dot.frame)
+        let y = CGRectGetMidY(dot.frame)
+        CGContextMoveToPoint(context, x, y)
+        CGContextAddArc(context, x, y, innerDotRadius, 0, CGFloat(2*M_PI), 1)
+        CGContextFillPath(context)
+        CGContextStrokeEllipseInRect(context, dot.frame)
     }
 }
 
