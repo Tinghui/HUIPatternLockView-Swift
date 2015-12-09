@@ -28,126 +28,126 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
         case Failed
     }
     
-    static let defaultColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
-    static let defaultSucceededColor = UIColor.greenColor()
-    static let defaultFailedColor = UIColor.redColor()
+    public static let defaultColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
+    public static let defaultSucceededColor = UIColor.greenColor()
+    public static let defaultFailedColor = UIColor.redColor()
     
     //MARK: Layouts Related Properties
-    @IBInspectable var numberOfRows: Int = 3 {
+    @IBInspectable public var numberOfRows: Int = 3 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var numberOfColumns: Int = 3 {
+    @IBInspectable public var numberOfColumns: Int = 3 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var contentInset: UIEdgeInsets = UIEdgeInsetsZero {
+    @IBInspectable public var contentInset: UIEdgeInsets = UIEdgeInsetsZero {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var dotWidth: CGFloat = 60.00 {
+    @IBInspectable public var dotWidth: CGFloat = 60.00 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
     
     //MARK: Appearance Related Properties
-    @IBInspectable var lineColor: UIColor = HUIPatternLockView.defaultColor {
+    @IBInspectable public var lineColor: UIColor = HUIPatternLockView.defaultColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var succeededLineColor: UIColor = HUIPatternLockView.defaultSucceededColor {
+    @IBInspectable public var succeededLineColor: UIColor = HUIPatternLockView.defaultSucceededColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var failedLineColor: UIColor = HUIPatternLockView.defaultFailedColor {
+    @IBInspectable public var failedLineColor: UIColor = HUIPatternLockView.defaultFailedColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var lineWidth: CGFloat = 5.00 {
+    @IBInspectable public var lineWidth: CGFloat = 5.00 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var normalOuterCircleColor: UIColor = UIColor.blackColor() {
+    @IBInspectable public var normalOuterCircleColor: UIColor = UIColor.blackColor() {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var highlightedOuterCircleColor: UIColor = HUIPatternLockView.defaultColor {
+    @IBInspectable public var highlightedOuterCircleColor: UIColor = HUIPatternLockView.defaultColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var succeededOuterCircleColor: UIColor = HUIPatternLockView.defaultSucceededColor {
+    @IBInspectable public var succeededOuterCircleColor: UIColor = HUIPatternLockView.defaultSucceededColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var failedOuterCircleColor: UIColor = HUIPatternLockView.defaultFailedColor {
+    @IBInspectable public var failedOuterCircleColor: UIColor = HUIPatternLockView.defaultFailedColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var normalInnerDotColor: UIColor = UIColor.blackColor() {
+    @IBInspectable public var normalInnerDotColor: UIColor = UIColor.blackColor() {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var highlightedInnerDotColor: UIColor = HUIPatternLockView.defaultColor {
+    @IBInspectable public var highlightedInnerDotColor: UIColor = HUIPatternLockView.defaultColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var succeededInnerDotColor: UIColor = HUIPatternLockView.defaultSucceededColor {
+    @IBInspectable public var succeededInnerDotColor: UIColor = HUIPatternLockView.defaultSucceededColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var failedInnerDotColor: UIColor = HUIPatternLockView.defaultFailedColor {
+    @IBInspectable public var failedInnerDotColor: UIColor = HUIPatternLockView.defaultFailedColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var innerDotRadius: CGFloat = 15.0 {
+    @IBInspectable public var innerDotRadius: CGFloat = 15.0 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var normalDotImage: UIImage? = nil {
+    @IBInspectable public var normalDotImage: UIImage? = nil {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var highlightedDotImage: UIImage? = nil {
+    @IBInspectable public var highlightedDotImage: UIImage? = nil {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var succeededDotImage: UIImage? = nil {
+    @IBInspectable public var succeededDotImage: UIImage? = nil {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var failedDotImage: UIImage? = nil {
+    @IBInspectable public var failedDotImage: UIImage? = nil {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
     
-    var password: String?
-    var resetDelay: NSTimeInterval = 1
+    public var password: String?
+    public var resetDelay: NSTimeInterval = 1
     
     
     //MARK: Callback
-    var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
-    var willResetPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
+    public var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
+    public var willResetPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
     
     //MARK: Private Internal vars
     private var normalDots = Array<HUIPatternLockViewDot>()
