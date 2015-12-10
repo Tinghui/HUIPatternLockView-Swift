@@ -165,11 +165,6 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
         }
     }
     
-    //MARK: Deinit/Init
-    deinit {
-        //TODO: need deinit?
-    }
-    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -264,7 +259,11 @@ extension HUIPatternLockView {
             CGContextDrawPath(context, .Stroke)
         }
         
-
+        /*  TODO: make dot drawing function configurable
+            eg: public var drawDot: ((dot: HUIPatternLockViewDot, withState: State, inContext: CGContext))? = nil
+            and add an state(normal or higlighted) var for dot would be better
+        */
+        
         //draw normal dot images
         CGContextSetLineWidth(context, 1)
 
@@ -276,7 +275,7 @@ extension HUIPatternLockView {
             CGContextSetFillColorWithColor(context, normalInnerDotColor.CGColor)
             CGContextSetStrokeColorWithColor(context, normalOuterCircleColor.CGColor)
             for dot in normalDots {
-                drawDot(dot)
+                drawDot(dot, withContext: context)
             }
         }
         
@@ -289,7 +288,7 @@ extension HUIPatternLockView {
             CGContextSetFillColorWithColor(context, highlightedInnerDotColor.CGColor)
             CGContextSetStrokeColorWithColor(context, highlightedOuterCircleColor.CGColor)
             for dot in highlightedDots {
-                drawDot(dot)
+                drawDot(dot, withContext:  context)
             }
         }
         
@@ -301,7 +300,7 @@ extension HUIPatternLockView {
             CGContextSetFillColorWithColor(context, succeededInnerDotColor.CGColor)
             CGContextSetStrokeColorWithColor(context, succeededOuterCircleColor.CGColor)
             for dot in succeededDots {
-                drawDot(dot)
+                drawDot(dot, withContext: context)
             }
         }
         
@@ -313,18 +312,18 @@ extension HUIPatternLockView {
             CGContextSetFillColorWithColor(context, failedInnerDotColor.CGColor)
             CGContextSetStrokeColorWithColor(context, failedOuterCircleColor.CGColor)
             for dot in failedDots {
-                drawDot(dot)
+                drawDot(dot, withContext: context)
             }
         }
-        
     }
 
-    private func drawDot(dot: HUIPatternLockViewDot) {
-        let context = UIGraphicsGetCurrentContext()
+    private func drawDot(dot: HUIPatternLockViewDot, withContext context: CGContextRef?) {
         let x = CGRectGetMidX(dot.frame)
         let y = CGRectGetMidY(dot.frame)
         CGContextMoveToPoint(context, x, y)
+        CGContextBeginPath(context)
         CGContextAddArc(context, x, y, innerDotRadius, 0, CGFloat(2*M_PI), 1)
+        CGContextClosePath(context)
         CGContextFillPath(context)
         CGContextStrokeEllipseInRect(context, dot.frame)
     }
