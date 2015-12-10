@@ -22,60 +22,143 @@ private func ==(lhs: HUIPatternLockViewDot, rhs: HUIPatternLockViewDot) -> Bool 
 }
 
 @IBDesignable public class HUIPatternLockView : UIView {
+    private enum State {
+        case Normal
+        case Succeeded
+        case Failed
+    }
+    
+    public static let defaultColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
+    public static let defaultSucceededColor = UIColor.greenColor()
+    public static let defaultFailedColor = UIColor.redColor()
     
     //MARK: Layouts Related Properties
-    @IBInspectable var numberOfRows: Int = 3 {
+    @IBInspectable public var numberOfRows: Int = 3 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var numberOfColumns: Int = 3 {
+    @IBInspectable public var numberOfColumns: Int = 3 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var contentInset: UIEdgeInsets = UIEdgeInsetsZero {
+    @IBInspectable public var contentInset: UIEdgeInsets = UIEdgeInsetsZero {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
-    @IBInspectable var dotWidth: CGFloat = 60.00 {
+    @IBInspectable public var dotWidth: CGFloat = 60.00 {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
         }
     }
     
     //MARK: Appearance Related Properties
-    @IBInspectable var lineColor: UIColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0) {
+    @IBInspectable public var lineColor: UIColor = HUIPatternLockView.defaultColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var lineWidth: CGFloat = 5.00 {
+    @IBInspectable public var succeededLineColor: UIColor = HUIPatternLockView.defaultSucceededColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var normalDotImage: UIImage? = nil {
+    @IBInspectable public var failedLineColor: UIColor = HUIPatternLockView.defaultFailedColor {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-    @IBInspectable var highlightedDotImage: UIImage? = nil {
+    @IBInspectable public var lineWidth: CGFloat = 5.00 {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var normalOuterCircleColor: UIColor = UIColor.blackColor() {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var highlightedOuterCircleColor: UIColor = HUIPatternLockView.defaultColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var succeededOuterCircleColor: UIColor = HUIPatternLockView.defaultSucceededColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var failedOuterCircleColor: UIColor = HUIPatternLockView.defaultFailedColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var normalInnerDotColor: UIColor = UIColor.blackColor() {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var highlightedInnerDotColor: UIColor = HUIPatternLockView.defaultColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var succeededInnerDotColor: UIColor = HUIPatternLockView.defaultSucceededColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var failedInnerDotColor: UIColor = HUIPatternLockView.defaultFailedColor {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var innerDotRadius: CGFloat = 15.0 {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var normalDotImage: UIImage? = nil {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var highlightedDotImage: UIImage? = nil {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var succeededDotImage: UIImage? = nil {
+        didSet {
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        }
+    }
+    @IBInspectable public var failedDotImage: UIImage? = nil {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
     
+    public var password: String?
+    public var resetDelay: NSTimeInterval = 1
+    
+    
     //MARK: Callback
-    var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
+    public var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
+    public var willResetPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
     
     //MARK: Private Internal vars
     private var normalDots = Array<HUIPatternLockViewDot>()
     private var highlightedDots = Array<HUIPatternLockViewDot>()
+    private var succeededDots = Array<HUIPatternLockViewDot>()
+    private var failedDots = Array<HUIPatternLockViewDot>()
     private var linePath = Array<CGPoint>()
     private var needRecalculateDotsFrame = true
-    
+    private var state: State = .Normal
+    private var resetTimer: NSTimer?
+
     override public var bounds: CGRect {
         didSet {
             setLockViewNeedUpdate(needRecalculateDotsFrame: true)
@@ -113,7 +196,11 @@ extension HUIPatternLockView {
         //reset dots arrays
         normalDots.removeAll()
         highlightedDots.removeAll()
+        succeededDots.removeAll()
+        failedDots.removeAll()
         linePath.removeAll()
+        state = .Normal
+        resetTimer?.invalidate()
         
         //calculate dot width with bounds
         let dotsAreaWidth = CGRectGetWidth(bounds) - contentInset.left - contentInset.right
@@ -151,7 +238,16 @@ extension HUIPatternLockView {
         
         //draw line
         if !linePath.isEmpty {
-            CGContextSetStrokeColorWithColor(context, lineColor.CGColor)
+            var color = lineColor
+            switch state {
+            case .Succeeded:
+                color = succeededLineColor
+            case .Failed:
+                color = failedLineColor
+            default:
+                color = lineColor
+            }
+            CGContextSetStrokeColorWithColor(context, color.CGColor)
             CGContextSetLineWidth(context, lineWidth)
             CGContextSetLineJoin(context, .Round)
             
@@ -168,10 +264,19 @@ extension HUIPatternLockView {
             CGContextDrawPath(context, .Stroke)
         }
         
+
         //draw normal dot images
+        CGContextSetLineWidth(context, 1)
+
         if let image = normalDotImage {
             for dot in normalDots {
                 image.drawInRect(dot.frame)
+            }
+        } else {
+            CGContextSetFillColorWithColor(context, normalInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, normalOuterCircleColor.CGColor)
+            for dot in normalDots {
+                drawDot(dot)
             }
         }
         
@@ -180,7 +285,48 @@ extension HUIPatternLockView {
             for dot in highlightedDots {
                 image.drawInRect(dot.frame)
             }
+        } else {
+            CGContextSetFillColorWithColor(context, highlightedInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, highlightedOuterCircleColor.CGColor)
+            for dot in highlightedDots {
+                drawDot(dot)
+            }
         }
+        
+        if let image = succeededDotImage {
+            for dot in succeededDots {
+                image.drawInRect(dot.frame)
+            }
+        } else {
+            CGContextSetFillColorWithColor(context, succeededInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, succeededOuterCircleColor.CGColor)
+            for dot in succeededDots {
+                drawDot(dot)
+            }
+        }
+        
+        if let image = failedDotImage {
+            for dot in failedDots {
+                image.drawInRect(dot.frame)
+            }
+        } else {
+            CGContextSetFillColorWithColor(context, failedInnerDotColor.CGColor)
+            CGContextSetStrokeColorWithColor(context, failedOuterCircleColor.CGColor)
+            for dot in failedDots {
+                drawDot(dot)
+            }
+        }
+        
+    }
+
+    private func drawDot(dot: HUIPatternLockViewDot) {
+        let context = UIGraphicsGetCurrentContext()
+        let x = CGRectGetMidX(dot.frame)
+        let y = CGRectGetMidY(dot.frame)
+        CGContextMoveToPoint(context, x, y)
+        CGContextAddArc(context, x, y, innerDotRadius, 0, CGFloat(2*M_PI), 1)
+        CGContextFillPath(context)
+        CGContextStrokeEllipseInRect(context, dot.frame)
     }
 }
 
@@ -257,30 +403,56 @@ extension HUIPatternLockView {
     }
     
     public override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard !highlightedDots.isEmpty else {
+            resetDotsState()
+            return
+        }
+        
         endLinePathWithPoint((touches.first?.locationInView(self))!)
         
         let dotCounts = highlightedDots.count
-        var password = String()
+        var currentPassword = String()
         for dot in highlightedDots {
-            password.appendContentsOf("[\(dot.tag)]")
+            currentPassword.appendContentsOf("[\(dot.tag)]")
         }
         
-        //reset dots state after 0.5. Make the line display 0.5 seconds
-        let delayInSeconds = 0.5;
-        let popTime = dispatch_time(DISPATCH_TIME_NOW, Int64(delayInSeconds * Double(NSEC_PER_SEC)));
-        dispatch_after(popTime, dispatch_get_main_queue()) { () -> Void in
-            self.resetDotsState()
-            self.setNeedsDisplay()
-        }
-        
-        //notify the delegate
-        if (dotCounts <= 0) {
-            return;
+        //if the correct password is set, redraw the dots and line in a success/failed state
+        if let pwd = password {
+            let succeeded = pwd == currentPassword
+            
+            if (succeeded) {
+                state = .Succeeded
+                succeededDots.appendContentsOf(normalDots)
+                succeededDots.appendContentsOf(highlightedDots)
+            } else {
+                state = .Failed
+                failedDots.appendContentsOf(normalDots)
+                failedDots.appendContentsOf(highlightedDots)
+            }
+            
+            
+            normalDots.removeAll()
+            highlightedDots.removeAll()
+            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
         
         if let callback = didDrawPatternWithPassword {
-            callback(lockeView: self, dotCounts: dotCounts, password: password)
+            callback(lockeView: self, dotCounts: dotCounts, password: currentPassword)
         }
+        
+        //reset dots state after resetDelay seconds. Make the line display resetDelay seconds
+        resetTimer?.invalidate()
+        resetTimer = NSTimer.scheduledTimerWithTimeInterval(resetDelay, target: self, selector: "timerFired:", userInfo: ["dotCounts": dotCounts, "password": currentPassword], repeats: false)
+    }
+    
+    func timerFired(timer: NSTimer) {
+        let dotCounts = timer.userInfo!["dotCounts"] as! Int
+        let currentPassword = timer.userInfo!["password"] as! String
+        if let callback = self.willResetPatternWithPassword {
+            callback(lockeView: self, dotCounts: dotCounts, password: currentPassword)
+        }
+        self.resetDotsState()
+        self.setNeedsDisplay()
     }
     
     public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
