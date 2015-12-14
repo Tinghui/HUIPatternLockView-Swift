@@ -12,12 +12,12 @@ import Foundation
 @IBDesignable public class HUIPatternLockView : UIView {
     public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
     public struct Dot: Equatable {
-        var tag: Int
-        var frame: CGRect
-        var center: CGPoint {
+        public var tag: Int
+        public var frame: CGRect
+        public var center: CGPoint {
             return CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame))
         }
-        var highlighted: Bool
+        public var highlighted: Bool
     }
     
     // MARK: Layouts Related Properties
