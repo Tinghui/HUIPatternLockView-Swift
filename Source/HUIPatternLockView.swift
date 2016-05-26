@@ -63,7 +63,7 @@ import Foundation
             setLockViewNeedUpdate(needRecalculateDotsFrame: false)
         }
     }
-
+    
     //MARK: Callback Properties
     public var drawLinePathWithContext: ((path: Array<CGPoint>, context: CGContextRef?) -> Void)? = nil {
         didSet {
@@ -131,13 +131,14 @@ extension HUIPatternLockView {
         let heightPerDots = dotsAreaHeight / CGFloat(numberOfRows)
         
         var dotTag = 0
-        for (var row = 0; row < numberOfRows; row++) {
-            for (var column = 0; column < numberOfColumns; column++) {
+        for row in 0 ..< numberOfRows{
+            for column in 0 ..< numberOfColumns {
                 let dotCenter = CGPointMake(contentInset.left + (CGFloat(column) + 0.5) * widthPerDots ,
-                    contentInset.top + (CGFloat(row) + 0.5) * heightPerDots)
+                                            contentInset.top + (CGFloat(row) + 0.5) * heightPerDots)
                 let dotFrame = CGRect(x: dotCenter.x - dotWidth * 0.5, y: dotCenter.y - dotWidth * 0.5,
-                    width: dotWidth, height: dotWidth)
-                let dot = Dot(tag: dotTag++, frame: dotFrame, highlighted: false)
+                                      width: dotWidth, height: dotWidth)
+                let dot = Dot(tag: dotTag, frame: dotFrame, highlighted: false)
+                dotTag += 1
                 normalDots.append(dot)
             }
         }
@@ -191,7 +192,7 @@ extension HUIPatternLockView {
             }
         }
         
-        //draw highlighted dots 
+        //draw highlighted dots
         if let drawDotClosure = drawDotWithContext {
             for dot in highlightedDots {
                 CGContextSaveGState(context)
