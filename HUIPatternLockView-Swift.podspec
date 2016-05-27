@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                = "HUIPatternLockView-Swift"
-  s.version             = "1.0.1"
+  s.version             = "1.0.2"
   s.summary             = "A pattern lock view for iOS"
   s.homepage            = "https://github.com/Tinghui/HUIPatternLockView-Swift"
   s.license             = { :type => "MIT", :file => "LICENSE.md" }
