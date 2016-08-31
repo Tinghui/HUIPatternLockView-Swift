@@ -1,3 +1,4 @@
+For swift 3.0, please checkout the '[swift3.0](https://github.com/Tinghui/HUIPatternLockView-Swift/tree/swift3.0)' branch.
 
 ## Demo Project
 See `HUIPatternLockViewDemo.xcodeproj`
