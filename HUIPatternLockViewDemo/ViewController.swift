@@ -30,15 +30,15 @@ class ViewController: UIViewController {
 
 // MARK: - Custom LockView with images
 extension ViewController {
-    private func configuareLockViewWithImages() {
+    internal func configuareLockViewWithImages() {
         let defaultLineColor = HUIPatternLockView.defaultLineColor
-        let correctLineColor = UIColor.greenColor()
-        let wrongLineColor = UIColor.redColor()
+        let correctLineColor = UIColor.green
+        let wrongLineColor = UIColor.red
         
         let normalImage = UIImage(named: "dot_normal")
         let highlightedImage = UIImage(named: "dot_highlighted")
-        let correctImage = highlightedImage?.tintImage(correctLineColor)
-        let wrongImage = highlightedImage?.tintImage(wrongLineColor)
+        let correctImage = highlightedImage?.tintImage(tintColor: correctLineColor)
+        let wrongImage = highlightedImage?.tintImage(tintColor: wrongLineColor)
         
         
         lockView.didDrawPatternWithPassword = { (lockView: HUIPatternLockView, count: Int, password: String?) -> Void in
@@ -59,8 +59,8 @@ extension ViewController {
                 lockView.normalDotImage = wrongImage
                 lockView.highlightedDotImage = wrongImage
             }
-            
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+        
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 lockView.resetDotsState()
                 lockView.lineColor = defaultLineColor
                 lockView.normalDotImage = normalImage
@@ -78,7 +78,7 @@ extension ViewController {
         case Wrong
     }
     
-    private func configuareLockViewWithCustomDrawingCodes() {
+    internal func configuareLockViewWithCustomDrawingCodes() {
         lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context)
         }
@@ -88,27 +88,27 @@ extension ViewController {
         }
         
         lockView.didDrawPatternWithPassword = { [unowned self] (lockView, count, password) -> Void in
-            self.handleLockViewDidDrawPassword(lockView, count: count, password: password)
+            self.handleLockViewDidDrawPassword(lockView: lockView, count: count, password: password)
         }
     }
     
-    private func colorForLockViewState(state: LockViewPasswordState, useHighlightedColor: Bool) -> UIColor {
+    private func colorForLockViewState(_ state: LockViewPasswordState, useHighlightedColor: Bool) -> UIColor {
         switch state {
         case .Correct:
-            return UIColor.greenColor()
+            return UIColor.green
         case .Wrong:
-            return UIColor.redColor()
+            return UIColor.red
         default:
             if useHighlightedColor {
                 return HUIPatternLockView.defaultLineColor
             }
             else {
-                return UIColor.blackColor()
+                return UIColor.black
             }
         }
     }
     
-    private func resetLockView(lockView: HUIPatternLockView) {
+    private func resetLockView(_ lockView: HUIPatternLockView) {
         lockView.resetDotsState()
         lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context)
@@ -116,7 +116,7 @@ extension ViewController {
         lockView.drawDotWithContext = { [unowned self] (dot, context) -> Void in
             self.drawLockViewDot(dot, context: context)
         }
-        lockView.userInteractionEnabled = true
+        lockView.isUserInteractionEnabled = true
     }
     
     private func handleLockViewDidDrawPassword(lockView: HUIPatternLockView, count: Int, password: String?) {
@@ -132,7 +132,7 @@ extension ViewController {
         }
         
         self.label.text = "Got Password: " + password!
-        lockView.userInteractionEnabled = false
+        lockView.isUserInteractionEnabled = false
         lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context, state: state)
         }
@@ -140,76 +140,84 @@ extension ViewController {
             self.drawLockViewDot(dot, context: context, state: state)
         }
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
-            self.resetLockView(lockView)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.resetLockView(lockView)
         }
     }
     
-    private func drawLockViewLinePath(path: Array<CGPoint>, context: CGContextRef?, state: LockViewPasswordState = .Normal) {
-        if path.isEmpty {
+    private func drawLockViewLinePath(_ path: Array<CGPoint>, context: CGContext?, state: LockViewPasswordState = .Normal) {
+        guard !path.isEmpty else {
+            return
+        }
+        
+        guard let context = context else {
             return
         }
         
         let color = colorForLockViewState(state, useHighlightedColor: true)
         let dashLengths: [CGFloat] = [5.0, 10.0, 5.0]
-        CGContextSetStrokeColorWithColor(context, color.CGColor);
-        CGContextSetLineWidth(context, 3)
-        CGContextSetLineCap(context, .Round)
-        CGContextSetLineJoin(context, .Round)
-        CGContextSetLineDash(context, 0, dashLengths, 3)
+        context.setStrokeColor(color.cgColor)
+        context.setLineWidth(3.0)
+        context.setLineCap(.round)
+        context.setLineJoin(.round)
+        context.setLineDash(phase: 0.0, lengths: dashLengths)
         
         let fistPoint = path.first
         for point in path {
             if point == fistPoint {
-                CGContextMoveToPoint(context, point.x, point.y)
+                context.move(to: point)
             }
             else {
-                CGContextAddLineToPoint(context, point.x, point.y)
+                context.addLine(to: point)
             }
         }
         
-        CGContextDrawPath(context, .Stroke)
+        context.drawPath(using: .stroke)
     }
     
-    private func drawLockViewDot(dot: HUIPatternLockView.Dot, context: CGContextRef?, state: LockViewPasswordState = .Normal) {
+    private func drawLockViewDot(_ dot: HUIPatternLockView.Dot, context: CGContext?, state: LockViewPasswordState = .Normal) {
+        guard let context = context else {
+            return
+        }
+        
         let dotCenter = dot.center
         let innerDotRadius: CGFloat = 15.0
         let color = colorForLockViewState(state, useHighlightedColor: dot.highlighted)
         
-        CGContextSetLineWidth(context, 1)
-        CGContextSetFillColorWithColor(context, color.CGColor)
-        CGContextSetStrokeColorWithColor(context, color.CGColor)
+        context.setLineWidth(1.0)
+        context.setFillColor(color.cgColor)
+        context.setStrokeColor(color.cgColor)
         
-        CGContextMoveToPoint(context, dotCenter.x, dotCenter.y)
-        CGContextBeginPath(context)
-        CGContextAddArc(context, dotCenter.x, dotCenter.y, innerDotRadius, 0, CGFloat(2*M_PI), 1)
-        CGContextClosePath(context)
-        CGContextFillPath(context)
-        CGContextStrokeEllipseInRect(context, dot.frame)
+        context.move(to: dotCenter)
+        context.beginPath()
+        context.addArc(center: dotCenter, radius: innerDotRadius, startAngle: 0, endAngle: CGFloat(2*M_PI), clockwise: true)
+        context.closePath()
+        context.fillPath()
+        context.strokeEllipse(in: dot.frame)
     }
 }
 
 extension UIImage {
-    public func tintImage(tintColor: UIColor) -> UIImage {
-        return tintImage(tintColor, blendMode: .DestinationIn)
+    public func tintImage(tintColor: UIColor) -> UIImage? {
+        return tintImage(tintColor, blendMode: .destinationIn)
     }
     
-    public func gradientTintImage(tintColor: UIColor) -> UIImage {
-        return tintImage(tintColor, blendMode: .Overlay)
+    public func gradientTintImage(tintColor: UIColor) -> UIImage? {
+        return tintImage(tintColor, blendMode: .overlay)
     }
     
-    public func tintImage(tintColor: UIColor, blendMode: CGBlendMode) -> UIImage {
+    public func tintImage(_ tintColor: UIColor, blendMode: CGBlendMode) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         
-        let bounds = CGRect(origin: CGPointZero, size: size)
+        let bounds = CGRect(origin: CGPoint.zero, size: size)
         tintColor.setFill()
         UIRectFill(bounds)
         
-        drawInRect(bounds, blendMode: blendMode, alpha: 1.0)
+        draw(in: bounds, blendMode: blendMode, alpha: 1.0)
         
         //draw again to save alpha channel
-        if blendMode != .DestinationIn {
-            drawInRect(bounds, blendMode: .DestinationIn, alpha: 1.0)
+        if blendMode != .destinationIn {
+            draw(in: bounds, blendMode: .destinationIn, alpha: 1.0)
         }
         
         let image = UIGraphicsGetImageFromCurrentImageContext()
