@@ -78,10 +78,10 @@ import Foundation
     public var didDrawPatternWithPassword: ((_ lockeView: HUIPatternLockView, _ dotCounts: Int, _ password: String?) -> Void)? = nil
     
     //MARK: Private Internal vars
-    internal var normalDots = Array<Dot>()
-    internal var highlightedDots = Array<Dot>()
-    internal var linePath = Array<CGPoint>()
-    internal var needRecalculateDotsFrame = true
+    fileprivate var normalDots = Array<Dot>()
+    fileprivate var highlightedDots = Array<Dot>()
+    fileprivate var linePath = Array<CGPoint>()
+    fileprivate var needRecalculateDotsFrame = true
     
     // MARK: init && override
     required public init?(coder aDecoder: NSCoder) {
@@ -105,7 +105,7 @@ import Foundation
 
 // MARK: - Draw Rect
 extension HUIPatternLockView {
-    internal func setLockViewNeedUpdate(needRecalculateDotsFrame needRecalculate: Bool) -> Void {
+    fileprivate func setLockViewNeedUpdate(needRecalculateDotsFrame needRecalculate: Bool) -> Void {
         if needRecalculate {
             needRecalculateDotsFrame = needRecalculate
         }
@@ -222,7 +222,7 @@ extension HUIPatternLockView {
         return nil
     }
     
-    internal func updateLinePathWithPoint(_ point: CGPoint) -> Void {
+    fileprivate func updateLinePathWithPoint(_ point: CGPoint) -> Void {
         let linePathPointsCount = linePath.count
         
         if var dot = normalDotContainsPoint(point) {
@@ -258,7 +258,7 @@ extension HUIPatternLockView {
         }
     }
     
-    internal func endLinePathWithPoint(_ point: CGPoint) -> Void {
+    fileprivate func endLinePathWithPoint(_ point: CGPoint) -> Void {
         if var dot = normalDotContainsPoint(point) {
             dot.highlighted = true
             highlightedDots.append(dot)
