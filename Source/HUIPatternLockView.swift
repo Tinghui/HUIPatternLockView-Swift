@@ -239,7 +239,9 @@ extension HUIPatternLockView {
             //mark this dot as highlighted
             dot.highlighted = true
             highlightedDots.append(dot);
-            normalDots.remove(at: normalDots.index(of: dot)!)
+            if let index = normalDots.index(of: dot) {
+                normalDots.remove(at: index)
+            }
         }
         else {
             
@@ -262,7 +264,9 @@ extension HUIPatternLockView {
         if var dot = normalDotContainsPoint(point) {
             dot.highlighted = true
             highlightedDots.append(dot)
-            normalDots.remove(at: normalDots.index(of: dot)!)
+            if let index = normalDots.index(of: dot) {
+                normalDots.remove(at: index)
+            }
         }
         
         linePath = highlightedDots.map({ (dot: Dot) -> CGPoint in
