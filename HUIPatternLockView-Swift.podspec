@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                = "HUIPatternLockView-Swift"
-  s.version             = "1.0.2"
+  s.version             = "2.0.0"
   s.summary             = "A pattern lock view for iOS"
   s.homepage            = "https://github.com/Tinghui/HUIPatternLockView-Swift"
   s.license             = { :type => "MIT", :file => "LICENSE.md" }
@@ -9,4 +9,5 @@ Pod::Spec.new do |s|
   s.requires_arc        = true
   s.source_files        = "Source/*.swift"
   s.source              = { :git => "https://github.com/Tinghui/HUIPatternLockView-Swift.git", :tag => s.version }
+  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '3.0' }
 end

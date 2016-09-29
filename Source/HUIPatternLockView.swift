@@ -10,12 +10,15 @@ import UIKit
 import Foundation
 
 @IBDesignable public class HUIPatternLockView : UIView {
-    public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
+    
+    public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00
+        , blue: 79.00/255.00, alpha: 1.0)
+    
     public struct Dot: Equatable {
         public var tag: Int
         public var frame: CGRect
         public var center: CGPoint {
-            return CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame))
+            return CGPoint(x: frame.midX, y: frame.midY)
         }
         public var highlighted: Bool
     }
@@ -23,65 +26,67 @@ import Foundation
     // MARK: Layouts Related Properties
     @IBInspectable public var numberOfRows: Int = 3 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     @IBInspectable public var numberOfColumns: Int = 3 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
-    @IBInspectable public var contentInset: UIEdgeInsets = UIEdgeInsetsZero {
+    @IBInspectable public var contentInset: UIEdgeInsets = UIEdgeInsets.zero {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     @IBInspectable public var dotWidth: CGFloat = 60.00 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     
     // MARK: Appearance Related Properties
     @IBInspectable public var lineColor: UIColor = HUIPatternLockView.defaultLineColor {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var lineWidth: CGFloat = 5.00 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var normalDotImage: UIImage? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var highlightedDotImage: UIImage? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     
     //MARK: Callback Properties
-    public var drawLinePathWithContext: ((path: Array<CGPoint>, context: CGContextRef?) -> Void)? = nil {
+    public var drawLinePath: ((_ path: Array<CGPoint>, _ context: CGContext) -> Void)? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
-    public var drawDotWithContext: ((dot: Dot, context: CGContextRef?) -> Void)? = nil {
+    
+    public var drawDot: ((_ dot: Dot, _ context: CGContext) -> Void)? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
-    public var didDrawPatternWithPassword: ((lockeView: HUIPatternLockView, dotCounts: Int, password: String?) -> Void)? = nil
+    
+    public var didDrawPatternPassword: ((_ lockeView: HUIPatternLockView, _ dotCounts: Int, _ password: String?) -> Void)? = nil
     
     //MARK: Private Internal vars
-    private var normalDots = Array<Dot>()
-    private var highlightedDots = Array<Dot>()
-    private var linePath = Array<CGPoint>()
-    private var needRecalculateDotsFrame = true
+    fileprivate var normalDots = Array<Dot>()
+    fileprivate var highlightedDots = Array<Dot>()
+    fileprivate var linePath = Array<CGPoint>()
+    fileprivate var needRelayoutDots = true
     
     // MARK: init && override
     required public init?(coder aDecoder: NSCoder) {
@@ -98,16 +103,16 @@ import Foundation
     
     override public var bounds: CGRect {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
 }
 
 // MARK: - Draw Rect
 extension HUIPatternLockView {
-    private func setLockViewNeedUpdate(needRecalculateDotsFrame needRecalculate: Bool) -> Void {
-        if needRecalculate {
-            needRecalculateDotsFrame = needRecalculate
+    fileprivate func setLockViewNeedsUpdate(needRelayoutDots relayout: Bool) -> Void {
+        if relayout {
+            needRelayoutDots = relayout
         }
         setNeedsDisplay()
     }
@@ -119,24 +124,25 @@ extension HUIPatternLockView {
         linePath.removeAll()
         
         //calculate dot width with bounds
-        let dotsAreaWidth = CGRectGetWidth(bounds) - contentInset.left - contentInset.right
-        let dotsAreaHeight = CGRectGetHeight(bounds) - contentInset.top - contentInset.bottom
+        let dotsAreaWidth = bounds.width - contentInset.left - contentInset.right
+        let dotsAreaHeight = bounds.height - contentInset.top - contentInset.bottom
         
         //throw exception if dots is too big
-        if (dotWidth * CGFloat(numberOfColumns) > CGFloat(dotsAreaWidth) || dotWidth * CGFloat(numberOfRows) > CGFloat(dotsAreaHeight)) {
-            print("HUIPatternLockView resetDotsState() -> Error: The dot is too big to be layout in content area")
+        guard dotWidth * CGFloat(numberOfColumns) <= CGFloat(dotsAreaWidth)
+            && dotWidth * CGFloat(numberOfRows) <= CGFloat(dotsAreaHeight) else {
+                fatalError("Error: The dot is too big to be layout in content area")
         }
         
         let widthPerDots = dotsAreaWidth / CGFloat(numberOfColumns)
         let heightPerDots = dotsAreaHeight / CGFloat(numberOfRows)
         
         var dotTag = 0
-        for row in 0 ..< numberOfRows{
+        for row in 0 ..< numberOfRows {
             for column in 0 ..< numberOfColumns {
-                let dotCenter = CGPointMake(contentInset.left + (CGFloat(column) + 0.5) * widthPerDots ,
-                                            contentInset.top + (CGFloat(row) + 0.5) * heightPerDots)
-                let dotFrame = CGRect(x: dotCenter.x - dotWidth * 0.5, y: dotCenter.y - dotWidth * 0.5,
-                                      width: dotWidth, height: dotWidth)
+                let dotCenter = CGPoint(x: contentInset.left + (CGFloat(column) + 0.5) * widthPerDots
+                    , y: contentInset.top + (CGFloat(row) + 0.5) * heightPerDots)
+                let dotFrame = CGRect(x: dotCenter.x - dotWidth * 0.5
+                    , y: dotCenter.y - dotWidth * 0.5, width: dotWidth, height: dotWidth)
                 let dot = Dot(tag: dotTag, frame: dotFrame, highlighted: false)
                 dotTag += 1
                 normalDots.append(dot)
@@ -144,65 +150,70 @@ extension HUIPatternLockView {
         }
     }
     
-    public override func drawRect(rect: CGRect) {
-        let context = UIGraphicsGetCurrentContext()
+    public override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return
+        }
         
         //recalculate dots' frame if needed
-        if (needRecalculateDotsFrame) {
+        if (needRelayoutDots) {
             resetDotsState()
-            needRecalculateDotsFrame = false
+            needRelayoutDots = false
         }
         
         //draw line
         if !linePath.isEmpty {
-            if let drawLineClosure = drawLinePathWithContext {
-                CGContextSaveGState(context)
-                drawLineClosure(path: linePath, context: context)
-                CGContextRestoreGState(context)
-            } else {
-                CGContextSetStrokeColorWithColor(context, lineColor.CGColor)
-                CGContextSetLineWidth(context, lineWidth)
-                CGContextSetLineJoin(context, .Round)
+            context.saveGState()
+            
+            if let drawLineClosure = drawLinePath {
+                drawLineClosure(linePath, context)
+            }
+            else {
+                context.setStrokeColor(lineColor.cgColor)
+                context.setLineWidth(lineWidth)
+                context.setLineJoin(.round)
                 
                 let firstPoint = linePath.first
                 for point in linePath {
                     if point == firstPoint {
-                        CGContextMoveToPoint(context, point.x, point.y)
+                        context.move(to: point)
                     }
                     else {
-                        CGContextAddLineToPoint(context, point.x, point.y)
+                        context.addLine(to: point)
                     }
                 }
                 
-                CGContextDrawPath(context, .Stroke)
+                context.drawPath(using: .stroke)
             }
+            
+            context.restoreGState()
         }
         
         //draw normal dots
-        if let drawDotClosure = drawDotWithContext {
+        if let drawDotClosure = drawDot {
             for dot in normalDots {
-                CGContextSaveGState(context)
-                drawDotClosure(dot: dot, context: context)
-                CGContextRestoreGState(context)
+                context.saveGState()
+                drawDotClosure(dot, context)
+                context.restoreGState()
             }
         }
         else if let image = normalDotImage {
             for dot in normalDots {
-                image.drawInRect(dot.frame)
+                image.draw(in: dot.frame)
             }
         }
         
         //draw highlighted dots
-        if let drawDotClosure = drawDotWithContext {
+        if let drawDotClosure = drawDot {
             for dot in highlightedDots {
-                CGContextSaveGState(context)
-                drawDotClosure(dot: dot, context: context)
-                CGContextRestoreGState(context)
+                context.saveGState()
+                drawDotClosure(dot, context)
+                context.restoreGState()
             }
         }
         else if let image = highlightedDotImage {
             for dot in highlightedDots {
-                image.drawInRect(dot.frame)
+                image.draw(in: dot.frame)
             }
         }
     }
@@ -210,16 +221,16 @@ extension HUIPatternLockView {
 
 // MARK: - Record Line Path
 extension HUIPatternLockView {
-    private func normalDotContainsPoint(point: CGPoint) -> Dot? {
+    private func normalDotContainsPoint(_ point: CGPoint) -> Dot? {
         for dot in normalDots {
-            if CGRectContainsPoint(dot.frame, point) {
+            if dot.frame.contains(point) {
                 return dot
             }
         }
         return nil
     }
     
-    private func updateLinePathWithPoint(point: CGPoint) -> Void {
+    fileprivate func updateLinePath(with point: CGPoint) -> Void {
         let linePathPointsCount = linePath.count
         
         if var dot = normalDotContainsPoint(point) {
@@ -230,13 +241,15 @@ extension HUIPatternLockView {
             }
             else {
                 //else insert a new point into the path
-                linePath.insert(dot.center, atIndex: linePathPointsCount-1)
+                linePath.insert(dot.center, at: linePathPointsCount-1)
             }
             
             //mark this dot as highlighted
             dot.highlighted = true
             highlightedDots.append(dot);
-            normalDots.removeAtIndex(normalDots.indexOf(dot)!)
+            if let index = normalDots.index(of: dot) {
+                normalDots.remove(at: index)
+            }
         }
         else {
             
@@ -255,11 +268,13 @@ extension HUIPatternLockView {
         }
     }
     
-    private func endLinePathWithPoint(point: CGPoint) -> Void {
+    fileprivate func endLinePath(with point: CGPoint) -> Void {
         if var dot = normalDotContainsPoint(point) {
             dot.highlighted = true
             highlightedDots.append(dot)
-            normalDots.removeAtIndex(normalDots.indexOf(dot)!)
+            if let index = normalDots.index(of: dot) {
+                normalDots.remove(at: index)
+            }
         }
         
         linePath = highlightedDots.map({ (dot: Dot) -> CGPoint in
@@ -270,44 +285,56 @@ extension HUIPatternLockView {
 
 // MARK: - Touches
 extension HUIPatternLockView {
-    public override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let point = touches.first?.location(in: self) else {
+            return
+        }
+        
         resetDotsState()
-        updateLinePathWithPoint((touches.first?.locationInView(self))!)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        updateLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
-    public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        updateLinePathWithPoint((touches.first?.locationInView(self))!)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let point = touches.first?.location(in: self) else {
+            return
+        }
+        
+        updateLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
-    public override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !highlightedDots.isEmpty else {
             return
         }
         
-        endLinePathWithPoint((touches.first?.locationInView(self))!)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        guard let point = touches.first?.location(in: self) else {
+            return
+        }
+        
+        endLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
         
         //get password and call back
         let dotCounts = highlightedDots.count
-        var currentPassword = String()
+        var password = String()
         for dot in highlightedDots {
-            currentPassword.appendContentsOf("[\(dot.tag)]")
+            password.append("[\(dot.tag)]")
         }
-        if let callback = didDrawPatternWithPassword {
-            callback(lockeView: self, dotCounts: dotCounts, password: currentPassword)
+        if let callback = didDrawPatternPassword {
+            callback(self, dotCounts, password)
         }
     }
     
-    public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetDotsState()
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
 }
 
 // MARK: - HUIPatternLockView.Dot: Equatable
 public func ==(lhs: HUIPatternLockView.Dot, rhs: HUIPatternLockView.Dot) -> Bool {
-    return (lhs.tag == rhs.tag && CGRectEqualToRect(lhs.frame, rhs.frame))
+    return (lhs.tag == rhs.tag && lhs.frame.equalTo(rhs.frame))
 }
 
