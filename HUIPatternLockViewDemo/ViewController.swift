@@ -40,8 +40,7 @@ extension ViewController {
         let correctImage = highlightedImage?.tintImage(tintColor: correctLineColor)
         let wrongImage = highlightedImage?.tintImage(tintColor: wrongLineColor)
         
-        
-        lockView.didDrawPatternWithPassword = { (lockView: HUIPatternLockView, count: Int, password: String?) -> Void in
+        lockView.didDrawPatternPassword = { (lockView, count, password) -> Void in
             guard count > 0 else {
                 return
             }
@@ -78,16 +77,16 @@ extension ViewController {
         case Wrong
     }
     
-    internal func configuareLockViewWithCustomDrawingCodes() {
-        lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
+    fileprivate func configuareLockViewWithCustomDrawingCodes() {
+        lockView.drawLinePath = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context)
         }
         
-        lockView.drawDotWithContext = { [unowned self] (dot, context) -> Void in
+        lockView.drawDot = { [unowned self] (dot, context) -> Void in
             self.drawLockViewDot(dot, context: context)
         }
         
-        lockView.didDrawPatternWithPassword = { [unowned self] (lockView, count, password) -> Void in
+        lockView.didDrawPatternPassword = { [unowned self] (lockView, count, password) -> Void in
             self.handleLockViewDidDrawPassword(lockView: lockView, count: count, password: password)
         }
     }
@@ -110,10 +109,10 @@ extension ViewController {
     
     private func resetLockView(_ lockView: HUIPatternLockView) {
         lockView.resetDotsState()
-        lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
+        lockView.drawLinePath = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context)
         }
-        lockView.drawDotWithContext = { [unowned self] (dot, context) -> Void in
+        lockView.drawDot = { [unowned self] (dot, context) -> Void in
             self.drawLockViewDot(dot, context: context)
         }
         lockView.isUserInteractionEnabled = true
@@ -133,10 +132,10 @@ extension ViewController {
         
         self.label.text = "Got Password: " + password!
         lockView.isUserInteractionEnabled = false
-        lockView.drawLinePathWithContext = { [unowned self] (path, context) -> Void in
+        lockView.drawLinePath = { [unowned self] (path, context) -> Void in
             self.drawLockViewLinePath(path, context: context, state: state)
         }
-        lockView.drawDotWithContext = { [unowned self] (dot, context) -> Void in
+        lockView.drawDot = { [unowned self] (dot, context) -> Void in
             self.drawLockViewDot(dot, context: context, state: state)
         }
         

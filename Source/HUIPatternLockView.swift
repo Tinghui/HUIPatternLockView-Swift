@@ -10,7 +10,10 @@ import UIKit
 import Foundation
 
 @IBDesignable public class HUIPatternLockView : UIView {
-    public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00, blue: 79.00/255.00, alpha: 1.0)
+    
+    public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00
+        , blue: 79.00/255.00, alpha: 1.0)
+    
     public struct Dot: Equatable {
         public var tag: Int
         public var frame: CGRect
@@ -23,65 +26,67 @@ import Foundation
     // MARK: Layouts Related Properties
     @IBInspectable public var numberOfRows: Int = 3 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     @IBInspectable public var numberOfColumns: Int = 3 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     @IBInspectable public var contentInset: UIEdgeInsets = UIEdgeInsets.zero {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     @IBInspectable public var dotWidth: CGFloat = 60.00 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
     
     // MARK: Appearance Related Properties
     @IBInspectable public var lineColor: UIColor = HUIPatternLockView.defaultLineColor {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var lineWidth: CGFloat = 5.00 {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var normalDotImage: UIImage? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     @IBInspectable public var highlightedDotImage: UIImage? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
     
     //MARK: Callback Properties
-    public var drawLinePathWithContext: ((_ path: Array<CGPoint>, _ context: CGContext?) -> Void)? = nil {
+    public var drawLinePath: ((_ path: Array<CGPoint>, _ context: CGContext) -> Void)? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
-    public var drawDotWithContext: ((_ dot: Dot, _ context: CGContext?) -> Void)? = nil {
+    
+    public var drawDot: ((_ dot: Dot, _ context: CGContext) -> Void)? = nil {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+            setLockViewNeedsUpdate(needRelayoutDots: false)
         }
     }
-    public var didDrawPatternWithPassword: ((_ lockeView: HUIPatternLockView, _ dotCounts: Int, _ password: String?) -> Void)? = nil
+    
+    public var didDrawPatternPassword: ((_ lockeView: HUIPatternLockView, _ dotCounts: Int, _ password: String?) -> Void)? = nil
     
     //MARK: Private Internal vars
     fileprivate var normalDots = Array<Dot>()
     fileprivate var highlightedDots = Array<Dot>()
     fileprivate var linePath = Array<CGPoint>()
-    fileprivate var needRecalculateDotsFrame = true
+    fileprivate var needRelayoutDots = true
     
     // MARK: init && override
     required public init?(coder aDecoder: NSCoder) {
@@ -98,16 +103,16 @@ import Foundation
     
     override public var bounds: CGRect {
         didSet {
-            setLockViewNeedUpdate(needRecalculateDotsFrame: true)
+            setLockViewNeedsUpdate(needRelayoutDots: true)
         }
     }
 }
 
 // MARK: - Draw Rect
 extension HUIPatternLockView {
-    fileprivate func setLockViewNeedUpdate(needRecalculateDotsFrame needRecalculate: Bool) -> Void {
-        if needRecalculate {
-            needRecalculateDotsFrame = needRecalculate
+    fileprivate func setLockViewNeedsUpdate(needRelayoutDots relayout: Bool) -> Void {
+        if relayout {
+            needRelayoutDots = relayout
         }
         setNeedsDisplay()
     }
@@ -123,20 +128,21 @@ extension HUIPatternLockView {
         let dotsAreaHeight = bounds.height - contentInset.top - contentInset.bottom
         
         //throw exception if dots is too big
-        if (dotWidth * CGFloat(numberOfColumns) > CGFloat(dotsAreaWidth) || dotWidth * CGFloat(numberOfRows) > CGFloat(dotsAreaHeight)) {
-            print("HUIPatternLockView resetDotsState() -> Error: The dot is too big to be layout in content area")
+        guard dotWidth * CGFloat(numberOfColumns) <= CGFloat(dotsAreaWidth)
+            && dotWidth * CGFloat(numberOfRows) <= CGFloat(dotsAreaHeight) else {
+                fatalError("Error: The dot is too big to be layout in content area")
         }
         
         let widthPerDots = dotsAreaWidth / CGFloat(numberOfColumns)
         let heightPerDots = dotsAreaHeight / CGFloat(numberOfRows)
         
         var dotTag = 0
-        for row in 0 ..< numberOfRows{
+        for row in 0 ..< numberOfRows {
             for column in 0 ..< numberOfColumns {
                 let dotCenter = CGPoint(x: contentInset.left + (CGFloat(column) + 0.5) * widthPerDots
                     , y: contentInset.top + (CGFloat(row) + 0.5) * heightPerDots)
-                let dotFrame = CGRect(x: dotCenter.x - dotWidth * 0.5, y: dotCenter.y - dotWidth * 0.5,
-                                      width: dotWidth, height: dotWidth)
+                let dotFrame = CGRect(x: dotCenter.x - dotWidth * 0.5
+                    , y: dotCenter.y - dotWidth * 0.5, width: dotWidth, height: dotWidth)
                 let dot = Dot(tag: dotTag, frame: dotFrame, highlighted: false)
                 dotTag += 1
                 normalDots.append(dot)
@@ -150,17 +156,17 @@ extension HUIPatternLockView {
         }
         
         //recalculate dots' frame if needed
-        if (needRecalculateDotsFrame) {
+        if (needRelayoutDots) {
             resetDotsState()
-            needRecalculateDotsFrame = false
+            needRelayoutDots = false
         }
         
         //draw line
         if !linePath.isEmpty {
-            if let drawLineClosure = drawLinePathWithContext {
-                context.saveGState()
+            context.saveGState()
+            
+            if let drawLineClosure = drawLinePath {
                 drawLineClosure(linePath, context)
-                context.restoreGState()
             }
             else {
                 context.setStrokeColor(lineColor.cgColor)
@@ -179,10 +185,12 @@ extension HUIPatternLockView {
                 
                 context.drawPath(using: .stroke)
             }
+            
+            context.restoreGState()
         }
         
         //draw normal dots
-        if let drawDotClosure = drawDotWithContext {
+        if let drawDotClosure = drawDot {
             for dot in normalDots {
                 context.saveGState()
                 drawDotClosure(dot, context)
@@ -196,7 +204,7 @@ extension HUIPatternLockView {
         }
         
         //draw highlighted dots
-        if let drawDotClosure = drawDotWithContext {
+        if let drawDotClosure = drawDot {
             for dot in highlightedDots {
                 context.saveGState()
                 drawDotClosure(dot, context)
@@ -222,7 +230,7 @@ extension HUIPatternLockView {
         return nil
     }
     
-    fileprivate func updateLinePathWithPoint(_ point: CGPoint) -> Void {
+    fileprivate func updateLinePath(with point: CGPoint) -> Void {
         let linePathPointsCount = linePath.count
         
         if var dot = normalDotContainsPoint(point) {
@@ -260,7 +268,7 @@ extension HUIPatternLockView {
         }
     }
     
-    fileprivate func endLinePathWithPoint(_ point: CGPoint) -> Void {
+    fileprivate func endLinePath(with point: CGPoint) -> Void {
         if var dot = normalDotContainsPoint(point) {
             dot.highlighted = true
             highlightedDots.append(dot)
@@ -283,8 +291,8 @@ extension HUIPatternLockView {
         }
         
         resetDotsState()
-        updateLinePathWithPoint(point)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        updateLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
     public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -292,8 +300,8 @@ extension HUIPatternLockView {
             return
         }
         
-        updateLinePathWithPoint(point)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        updateLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -305,23 +313,23 @@ extension HUIPatternLockView {
             return
         }
         
-        endLinePathWithPoint(point)
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        endLinePath(with: point)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
         
         //get password and call back
         let dotCounts = highlightedDots.count
-        var currentPassword = String()
+        var password = String()
         for dot in highlightedDots {
-            currentPassword.append("[\(dot.tag)]")
+            password.append("[\(dot.tag)]")
         }
-        if let callback = didDrawPatternWithPassword {
-            callback(self, dotCounts, currentPassword)
+        if let callback = didDrawPatternPassword {
+            callback(self, dotCounts, password)
         }
     }
     
     public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetDotsState()
-        setLockViewNeedUpdate(needRecalculateDotsFrame: false)
+        setLockViewNeedsUpdate(needRelayoutDots: false)
     }
 }
 

@@ -1,19 +1,21 @@
-For swift 3.0, please checkout the '[swift3.0](https://github.com/Tinghui/HUIPatternLockView-Swift/tree/swift3.0)' branch.
+Now HUIPatternLockView is support Swift 3.0
+* To use with Swift 2.x please ensure you are using == 1.0.2
+* To use with Swift 3.x please ensure you are using >= 2.0.0
 
 ## Demo Project
 See `HUIPatternLockViewDemo.xcodeproj`
 
-![](https://github.com/Tinghui/HUIPatternLockView-Swift/blob/master/preview.png?raw=true) 
+![](https://github.com/Tinghui/HUIPatternLockView-Swift/blob/master/preview.png?raw=true)
 
 ## Installation by CocoaPods
 1. Add pod into your Podfile
 
 	```swift
-	pod 'HUIPatternLockView-Swift', '~> 1.0.2'
+	pod 'HUIPatternLockView-Swift', '~> 2.0.0'
 	```
 
 2. Run pod install
-	
+
 3. import HUIPatternLockView
 
 
@@ -42,5 +44,3 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
-
-
