@@ -9,7 +9,7 @@
 import UIKit
 import Foundation
 
-@IBDesignable public class HUIPatternLockView : UIView {
+@IBDesignable open class HUIPatternLockView : UIView {
     
     public static let defaultLineColor = UIColor(red: 248.00/255.00, green: 200.00/255.00
         , blue: 79.00/255.00, alpha: 1.0)
@@ -101,7 +101,7 @@ import Foundation
         self.init(frame: CGRect.zero)
     }
     
-    override public var bounds: CGRect {
+    override open var bounds: CGRect {
         didSet {
             setLockViewNeedsUpdate(needRelayoutDots: true)
         }
@@ -150,7 +150,7 @@ extension HUIPatternLockView {
         }
     }
     
-    public override func draw(_ rect: CGRect) {
+    open override func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext() else {
             return
         }
@@ -285,7 +285,7 @@ extension HUIPatternLockView {
 
 // MARK: - Touches
 extension HUIPatternLockView {
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let point = touches.first?.location(in: self) else {
             return
         }
@@ -295,7 +295,7 @@ extension HUIPatternLockView {
         setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
-    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let point = touches.first?.location(in: self) else {
             return
         }
@@ -304,7 +304,7 @@ extension HUIPatternLockView {
         setLockViewNeedsUpdate(needRelayoutDots: false)
     }
     
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !highlightedDots.isEmpty else {
             return
         }
@@ -327,7 +327,7 @@ extension HUIPatternLockView {
         }
     }
     
-    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+    open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetDotsState()
         setLockViewNeedsUpdate(needRelayoutDots: false)
     }
