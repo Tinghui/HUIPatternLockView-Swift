@@ -11,7 +11,7 @@ See `HUIPatternLockViewDemo.xcodeproj`
 1. Add pod into your Podfile
 
 	```swift
-	pod 'HUIPatternLockView-Swift', '~> 2.0.0'
+	pod 'HUIPatternLockView-Swift', '~> 2.0.1'
 	```
 
 2. Run pod install
