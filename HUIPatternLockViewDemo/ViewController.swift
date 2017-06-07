@@ -189,7 +189,7 @@ extension ViewController {
         
         context.move(to: dotCenter)
         context.beginPath()
-        context.addArc(center: dotCenter, radius: innerDotRadius, startAngle: 0, endAngle: CGFloat(2*M_PI), clockwise: true)
+        context.addArc(center: dotCenter, radius: innerDotRadius, startAngle: 0, endAngle: CGFloat(2*Double.pi), clockwise: true)
         context.closePath()
         context.fillPath()
         context.strokeEllipse(in: dot.frame)
